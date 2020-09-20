@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:multiselect_scope/multiselect.dart';
+import 'package:multiselect_scope/multiselect_scope.dart';
 
 void main() {
   runApp(MyApp());
@@ -51,6 +53,19 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
+  List<String> _items;
+  MultiselectController _multiselectController;
+
+  @override
+  void initState() {
+    super.initState();
+    _multiselectController = MultiselectController();
+    // _multiselectController.addListener(() {
+    //   debugPrint("Custom listener invoked!");
+    // });
+
+    _items = List.generate(10, (index) => "Item $index");
+  }
 
   void _incrementCounter() {
     setState(() {
@@ -65,6 +80,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    //ToggleButtons
+
     // This method is rerun every time setState is called, for instance as done
     // by the _incrementCounter method above.
     //
@@ -77,41 +94,116 @@ class _MyHomePageState extends State<MyHomePage> {
         // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
+      body: GreatMultiselect(
+        controller: _multiselectController,
+        onSelectionChanged: (indexes) {
+          debugPrint("Custom listener invoked! $indexes");
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              Expanded(
+                child: Builder(builder: (context) {
+                  return ListView.builder(
+                      itemCount: _items.length,
+                      itemBuilder: (context, index) {
+                        final controller = GreatMultiselect.of(
+                            context); //MultiselectScope.of(context);
+
+                        final itemIsSelected =
+                            controller.indexIsSelected(index);
+
+                        return InkWell(
+                          onTap: () {
+                            debugPrint("Item is selected: $itemIsSelected");
+
+                            if (itemIsSelected) {
+                              controller.unselectItem(index);
+                            } else {
+                              controller.select(index);
+                            }
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Container(
+                              color: itemIsSelected
+                                  ? Theme.of(context).primaryColor
+                                  : null,
+                              child: Text(
+                                _items[index],
+                                style: TextStyle(fontSize: 22),
+                              ),
+                            ),
+                          ),
+                        );
+                      });
+                }),
+              ),
+              Rectangle(),
+              RawMaterialButton(
+                child: Text("Удалить"),
+                onPressed: () {
+                  setState(() {
+                    final itemsToRemove = _multiselectController.selectedIndexes
+                        .map((e) => _items[e])
+                        .toList();
+
+                    _multiselectController.detachSelection();
+
+                    _items = _items
+                        .where((element) => !itemsToRemove.contains(element))
+                        .toList();
+                  });
+                },
+              )
+            ],
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
+        onPressed: () {
+          _multiselectController.select(0);
+        },
         tooltip: 'Increment',
         child: Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
+    );
+  }
+}
+
+class Rectangle extends StatelessWidget {
+  Rectangle({Key key /*, MultiselectController controller*/}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    debugPrint("build Rectangle");
+
+    return Container(
+      height: 50,
+      width: 50,
+      color: Colors.red,
+    );
+  }
+}
+
+class RectangleStateful extends StatefulWidget {
+  const RectangleStateful({Key key}) : super(key: key);
+
+  @override
+  _RectangleStatefulState createState() => _RectangleStatefulState();
+}
+
+class _RectangleStatefulState extends State<RectangleStateful> {
+  @override
+  Widget build(BuildContext context) {
+    debugPrint("build Rectangle stateful");
+
+    return Container(
+      height: 50,
+      width: 50,
+      color: Colors.red,
     );
   }
 }
