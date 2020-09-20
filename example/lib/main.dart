@@ -52,7 +52,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+  //int _counter = 0;
   List<String> _items;
   MultiselectController _multiselectController;
 
@@ -67,16 +67,16 @@ class _MyHomePageState extends State<MyHomePage> {
     _items = List.generate(10, (index) => "Item $index");
   }
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
+  // void _incrementCounter() {
+  //   setState(() {
+  //     // This call to setState tells the Flutter framework that something has
+  //     // changed in this State, which causes it to rerun the build method below
+  //     // so that the display can reflect the updated values. If we changed
+  //     // _counter without calling setState(), then the build method would not be
+  //     // called again, and so nothing would appear to happen.
+  //     _counter++;
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -96,6 +96,7 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: GreatMultiselect(
         controller: _multiselectController,
+        itemsCount: _items.length,
         onSelectionChanged: (indexes) {
           debugPrint("Custom listener invoked! $indexes");
         },
@@ -105,41 +106,41 @@ class _MyHomePageState extends State<MyHomePage> {
             mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
               Expanded(
-                child: Builder(builder: (context) {
-                  return ListView.builder(
-                      itemCount: _items.length,
-                      itemBuilder: (context, index) {
-                        final controller = GreatMultiselect.of(
-                            context); //MultiselectScope.of(context);
+                child: ListView.builder(
+                    itemCount: _items.length,
+                    itemBuilder: (context, index) {
+                      final controller = GreatMultiselect.of(
+                          context); //MultiselectScope.of(context);
 
-                        final itemIsSelected =
-                            controller.indexIsSelected(index);
+                      final itemIsSelected = controller.indexIsSelected(index);
 
-                        return InkWell(
-                          onTap: () {
-                            debugPrint("Item is selected: $itemIsSelected");
+                      return InkWell(
+                        onLongPress: () {
+                          if (!controller.selectionAttached) {
+                            controller.select(index);
+                          }
+                        },
+                        onTap: () {
+                          debugPrint("Item is selected: $itemIsSelected");
 
-                            if (itemIsSelected) {
-                              controller.unselectItem(index);
-                            } else {
-                              controller.select(index);
-                            }
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Container(
-                              color: itemIsSelected
-                                  ? Theme.of(context).primaryColor
-                                  : null,
-                              child: Text(
-                                _items[index],
-                                style: TextStyle(fontSize: 22),
-                              ),
+                          if (controller.selectionAttached) {
+                            controller.select(index);
+                          }
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Container(
+                            color: itemIsSelected
+                                ? Theme.of(context).primaryColor
+                                : null,
+                            child: Text(
+                              _items[index],
+                              style: TextStyle(fontSize: 22),
                             ),
                           ),
-                        );
-                      });
-                }),
+                        ),
+                      );
+                    }),
               ),
               Rectangle(),
               RawMaterialButton(
@@ -150,7 +151,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         .map((e) => _items[e])
                         .toList();
 
-                    _multiselectController.detachSelection();
+                    _multiselectController.clearSelection();
 
                     _items = _items
                         .where((element) => !itemsToRemove.contains(element))
