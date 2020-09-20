@@ -20,7 +20,7 @@ class MultiselectController extends ChangeNotifier {
   int _listLength;
 
   /// Sets the controller length
-  void set(int i) {
+  set(int i) {
     _listLength = i;
     selectedIndexes.clear();
 
@@ -61,20 +61,6 @@ class MultiselectController extends ChangeNotifier {
 
   invertSelection() {}
 
-  // unselectItem(int index) {
-  //   if (_selectedIndexes.contains(index)) {
-  //     _selectedIndexes.remove(index);
-  //     notifyListeners();
-  //   }
-  // }
-
-  // detachSelection() {
-  //   if (selectedIndexes.any((element) => true)) {
-  //     selectedIndexes.clear();
-  //     notifyListeners();
-  //   }
-  // }
-
   bool indexIsSelected(int i) {
     return _selectedIndexes.contains(i);
   }
@@ -87,13 +73,15 @@ class GreatMultiselect extends StatefulWidget {
   final SelectionChangedCallback onSelectionChanged;
   final MultiselectController controller;
   final int itemsCount;
+  final bool clearSelectionOnBackPressed;
 
   GreatMultiselect(
       {Key key,
       @required this.child,
       this.onSelectionChanged,
       this.controller,
-      @required this.itemsCount})
+      @required this.itemsCount,
+      this.clearSelectionOnBackPressed = false})
       : super(key: key);
 
   @override
@@ -128,7 +116,20 @@ class _GreatMultiselectState extends State<GreatMultiselect> {
 
   @override
   Widget build(BuildContext context) {
-    return MultiselectScope(child: widget.child, controller: widget.controller);
+    return widget.clearSelectionOnBackPressed
+        ? WillPopScope(
+            onWillPop: () async {
+              if (widget.controller.selectionAttached) {
+                widget.controller.clearSelection();
+                return false;
+              }
+
+              return true;
+            },
+            child: MultiselectScope(
+                child: widget.child, controller: widget.controller),
+          )
+        : MultiselectScope(child: widget.child, controller: widget.controller);
   }
 }
 

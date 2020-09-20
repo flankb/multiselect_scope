@@ -97,6 +97,7 @@ class _MyHomePageState extends State<MyHomePage> {
       body: GreatMultiselect(
         controller: _multiselectController,
         itemsCount: _items.length,
+        clearSelectionOnBackPressed: true,
         onSelectionChanged: (indexes) {
           debugPrint("Custom listener invoked! $indexes");
         },
