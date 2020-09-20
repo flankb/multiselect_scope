@@ -2,32 +2,78 @@ library multiselect_scope;
 
 import 'package:flutter/cupertino.dart';
 
+enum SelectionEvent {
+  auto,
+
+  select,
+
+  unselect,
+}
+
 class MultiselectController extends ChangeNotifier {
-  //TODO Инкапсулировать
+  //bool _selectionAttached = false;
   List<int> _selectedIndexes = [];
+
   List<int> get selectedIndexes => _selectedIndexes;
+  bool get selectionAttached => _selectedIndexes.any((element) => true);
 
-  select(int index) {
-    if (!_selectedIndexes.contains(index)) {
-      //debugPrint("!_selectedIndexes.contains");
-      _selectedIndexes.add(index);
-      notifyListeners();
+  int _listLength;
+
+  /// Sets the controller length
+  void set(int i) {
+    _listLength = i;
+    selectedIndexes.clear();
+
+    //notifyListeners();
+  }
+
+  select(int index, {SelectionEvent event = SelectionEvent.auto}) {
+    final indexContains = _selectedIndexes.contains(index);
+    final computedEvent = event == SelectionEvent.auto
+        ? indexContains ? SelectionEvent.unselect : SelectionEvent.select
+        : event;
+
+    if (computedEvent == SelectionEvent.select) {
+      if (!indexContains) {
+        _selectedIndexes.add(index);
+        notifyListeners();
+      }
+    } else if (computedEvent == SelectionEvent.unselect) {
+      if (indexContains) {
+        _selectedIndexes.remove(index);
+        notifyListeners();
+      }
     }
   }
 
-  unselectItem(int index) {
-    if (_selectedIndexes.contains(index)) {
-      _selectedIndexes.remove(index);
-      notifyListeners();
-    }
+  List<T> getSelectedItems<T>(List<T> allItems) {
+    final selectedItems = selectedIndexes.map((e) => allItems[e]).toList();
+
+    return selectedItems;
   }
 
-  detachSelection() {
+  clearSelection() {
     if (selectedIndexes.any((element) => true)) {
       selectedIndexes.clear();
       notifyListeners();
     }
   }
+
+  invertSelection() {}
+
+  // unselectItem(int index) {
+  //   if (_selectedIndexes.contains(index)) {
+  //     _selectedIndexes.remove(index);
+  //     notifyListeners();
+  //   }
+  // }
+
+  // detachSelection() {
+  //   if (selectedIndexes.any((element) => true)) {
+  //     selectedIndexes.clear();
+  //     notifyListeners();
+  //   }
+  // }
 
   bool indexIsSelected(int i) {
     return _selectedIndexes.contains(i);
@@ -40,8 +86,14 @@ class GreatMultiselect extends StatefulWidget {
   final Widget child;
   final SelectionChangedCallback onSelectionChanged;
   final MultiselectController controller;
+  final int itemsCount;
+
   GreatMultiselect(
-      {Key key, this.child, this.onSelectionChanged, this.controller})
+      {Key key,
+      @required this.child,
+      this.onSelectionChanged,
+      this.controller,
+      @required this.itemsCount})
       : super(key: key);
 
   @override
@@ -58,6 +110,8 @@ class _GreatMultiselectState extends State<GreatMultiselect> {
   @override
   void initState() {
     super.initState();
+
+    widget.controller.set(widget.itemsCount);
 
     if (widget.onSelectionChanged != null) {
       widget.controller.addListener(() {
