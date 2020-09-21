@@ -3,10 +3,13 @@ library multiselect_scope;
 import 'package:flutter/cupertino.dart';
 
 enum SelectionEvent {
+  /// Unselect item if it selected, select otherwise
   auto,
 
+  /// Select item
   select,
 
+  /// Deselect item
   unselect,
 }
 
@@ -17,15 +20,7 @@ class MultiselectController extends ChangeNotifier {
   List<int> get selectedIndexes => _selectedIndexes;
   bool get selectionAttached => _selectedIndexes.any((element) => true);
 
-  int _listLength;
-
-  /// Sets the controller length
-  set(int i) {
-    _listLength = i;
-    selectedIndexes.clear();
-
-    //notifyListeners();
-  }
+  int _itemsCount;
 
   select(int index, {SelectionEvent event = SelectionEvent.auto}) {
     final indexContains = _selectedIndexes.contains(index);
@@ -61,28 +56,47 @@ class MultiselectController extends ChangeNotifier {
 
   invertSelection() {}
 
+  selectAll() {
+    _selectedIndexes = List<int>.generate(_itemsCount, (i) => i);
+    notifyListeners();
+  }
+
   bool indexIsSelected(int i) {
     return _selectedIndexes.contains(i);
+  }
+
+  _setItemsCount(int itemsCount) {
+    _itemsCount = itemsCount;
+  }
+
+  void _setSelectedIndexes(List<int> newIndexes) {
+    _selectedIndexes = newIndexes;
+    //notifyListeners();
   }
 }
 
 typedef SelectionChangedCallback = void Function(List<int> selectedIndexes);
 
-class GreatMultiselect extends StatefulWidget {
+typedef SelectedItemBuilder = G Function<G>(int index);
+
+class GreatMultiselect<T> extends StatefulWidget {
   final Widget child;
   final SelectionChangedCallback onSelectionChanged;
   final MultiselectController controller;
-  final int itemsCount;
-  final bool clearSelectionOnBackPressed;
+  final List<T> dataSource;
+  final bool clearSelectionOnPop;
+  final bool preserveSelectedIndexesBetweenUpdates;
 
-  GreatMultiselect(
-      {Key key,
-      @required this.child,
-      this.onSelectionChanged,
-      this.controller,
-      @required this.itemsCount,
-      this.clearSelectionOnBackPressed = false})
-      : super(key: key);
+  GreatMultiselect({
+    Key key,
+    @required this.child,
+    @required this.dataSource,
+    this.onSelectionChanged,
+    this.controller,
+    this.clearSelectionOnPop = false,
+    this.preserveSelectedIndexesBetweenUpdates = true,
+  })  : assert(dataSource != null),
+        super(key: key);
 
   @override
   _GreatMultiselectState createState() => _GreatMultiselectState();
@@ -95,17 +109,35 @@ class GreatMultiselect extends StatefulWidget {
 }
 
 class _GreatMultiselectState extends State<GreatMultiselect> {
+  List<int> _hashesCopy;
+
   @override
   void initState() {
     super.initState();
 
-    widget.controller.set(widget.itemsCount);
+    debugPrint("_GreatMultiselectState init()");
+
+    _hashesCopy = _createHashesCopy();
 
     if (widget.onSelectionChanged != null) {
       widget.controller.addListener(() {
         widget.onSelectionChanged.call(widget.controller.selectedIndexes);
       });
     }
+  }
+
+  List<int> _createHashesCopy() {
+    return widget.dataSource.map((e) => e.hashCode).toList();
+  }
+
+  @override
+  void didUpdateWidget(GreatMultiselect oldWidget) {
+    debugPrint("didUpdateWidget GreatMultiselect");
+    if (widget.preserveSelectedIndexesBetweenUpdates) {
+      _updateController(oldWidget);
+    }
+
+    super.didUpdateWidget(oldWidget);
   }
 
   @override
@@ -116,7 +148,7 @@ class _GreatMultiselectState extends State<GreatMultiselect> {
 
   @override
   Widget build(BuildContext context) {
-    return widget.clearSelectionOnBackPressed
+    return widget.clearSelectionOnPop
         ? WillPopScope(
             onWillPop: () async {
               if (widget.controller.selectionAttached) {
@@ -126,10 +158,38 @@ class _GreatMultiselectState extends State<GreatMultiselect> {
 
               return true;
             },
-            child: MultiselectScope(
-                child: widget.child, controller: widget.controller),
+            child: _buildMultiselectScope(),
           )
-        : MultiselectScope(child: widget.child, controller: widget.controller);
+        : _buildMultiselectScope();
+  }
+
+  MultiselectScope _buildMultiselectScope() =>
+      MultiselectScope(child: widget.child, controller: widget.controller);
+
+  _updateController(GreatMultiselect oldWidget) {
+    //_hashesCopy = widget.dataSource.map((e) => e.hashCode).toList();
+
+    final newHashesCopy = _createHashesCopy();
+
+    //debugPrint(
+    //    "Old dataSource: ${_hashesCopy} new dataSource: ${newHashesCopy}");
+
+    final oldSelectedHashes =
+        widget.controller.selectedIndexes.map((e) => _hashesCopy[e]).toList();
+
+    final newIndexes = <int>[];
+    newHashesCopy.asMap().forEach((index, value) {
+      //debugPrint("$index $value");
+
+      if (oldSelectedHashes.contains(value)) {
+        newIndexes.add(index);
+      }
+    });
+
+    widget.controller._setItemsCount(widget.dataSource.length);
+    widget.controller._setSelectedIndexes(newIndexes);
+
+    _hashesCopy = newHashesCopy;
   }
 }
 

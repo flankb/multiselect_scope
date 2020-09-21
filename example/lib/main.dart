@@ -94,10 +94,10 @@ class _MyHomePageState extends State<MyHomePage> {
         // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
       ),
-      body: GreatMultiselect(
+      body: GreatMultiselect<String>(
         controller: _multiselectController,
-        itemsCount: _items.length,
-        clearSelectionOnBackPressed: true,
+        dataSource: _items,
+        clearSelectionOnPop: true,
         onSelectionChanged: (indexes) {
           debugPrint("Custom listener invoked! $indexes");
         },
@@ -144,21 +144,37 @@ class _MyHomePageState extends State<MyHomePage> {
                     }),
               ),
               Rectangle(),
-              RawMaterialButton(
-                child: Text("Удалить"),
-                onPressed: () {
-                  setState(() {
-                    final itemsToRemove = _multiselectController.selectedIndexes
-                        .map((e) => _items[e])
-                        .toList();
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  RawMaterialButton(
+                    child: Text("Add"),
+                    fillColor: Colors.lightGreen,
+                    onPressed: () {
+                      setState(() {
+                        final randItem = "RandItem";
+                        _items.insert(3, randItem);
+                      });
+                    },
+                  ),
+                  RawMaterialButton(
+                    fillColor: Colors.blueGrey,
+                    child: Text("Удалить"),
+                    onPressed: () {
+                      setState(() {
+                        final itemsToRemove =
+                            _multiselectController.getSelectedItems(_items);
 
-                    _multiselectController.clearSelection();
+                        _multiselectController.clearSelection();
 
-                    _items = _items
-                        .where((element) => !itemsToRemove.contains(element))
-                        .toList();
-                  });
-                },
+                        _items = _items
+                            .where(
+                                (element) => !itemsToRemove.contains(element))
+                            .toList();
+                      });
+                    },
+                  ),
+                ],
               )
             ],
           ),
