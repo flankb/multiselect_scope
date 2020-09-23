@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:multiselect_scope/multiselect_scope.dart';
 
@@ -147,8 +149,9 @@ class _MyHomePageState extends State<MyHomePage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   RawMaterialButton(
-                    child: Text('Add'),
-                    fillColor: Colors.lightGreen,
+                    child: Text('Add rand'),
+                    padding: EdgeInsets.symmetric(horizontal: 8.0),
+                    fillColor: Colors.blueGrey,
                     onPressed: () {
                       setState(() {
                         final randItem = 'RandItem';
@@ -157,14 +160,25 @@ class _MyHomePageState extends State<MyHomePage> {
                     },
                   ),
                   RawMaterialButton(
+                    padding: EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Text('Remove rand'),
+                    fillColor: Colors.lightGreen,
+                    onPressed: () {
+                      setState(() {
+                        _items.removeAt(Random().nextInt(_items.length - 1));
+                      });
+                    },
+                  ),
+                  RawMaterialButton(
+                    padding: EdgeInsets.symmetric(horizontal: 8.0),
                     fillColor: Colors.blueGrey,
-                    child: Text('Удалить'),
+                    child: Text('Delete'),
                     onPressed: () {
                       setState(() {
                         final itemsToRemove =
                             _multiselectController.getSelectedItems(_items);
 
-                        _multiselectController.clearSelection();
+                        //_multiselectController.clearSelection();
 
                         _items = _items
                             .where(

@@ -82,6 +82,7 @@ class MultiselectScope<T> extends StatefulWidget {
   final List<T> dataSource;
   final bool clearSelectionOnPop;
   final bool preserveSelectedIndexesBetweenUpdates;
+  final List<int> initialSelectedIndexes;
 
   MultiselectScope({
     Key key,
@@ -91,6 +92,7 @@ class MultiselectScope<T> extends StatefulWidget {
     this.clearSelectionOnPop = false,
     this.preserveSelectedIndexesBetweenUpdates = true,
     @required this.child,
+    this.initialSelectedIndexes,
   })  : assert(dataSource != null),
         assert(child != null),
         assert(controller != null),
@@ -192,6 +194,12 @@ class _MultiselectScopeState extends State<MultiselectScope> {
 
     _hashesCopy = newHashesCopy;
   }
+
+  // void _setInitialIndexes() {
+  //   if (widget.initialSelectedIndexes != null){
+  //     widget.controller._setSelectedIndexes(widget.initialSelectedIndexes);
+  //   }
+  // }
 }
 
 class _InheritedMultiselectNotifier
