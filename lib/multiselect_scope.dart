@@ -118,6 +118,7 @@ class _GreatMultiselectState extends State<GreatMultiselect> {
     debugPrint("_GreatMultiselectState init()");
 
     _hashesCopy = _createHashesCopy();
+    widget.controller._setItemsCount(widget.dataSource.length);
 
     if (widget.onSelectionChanged != null) {
       widget.controller.addListener(() {
@@ -148,6 +149,7 @@ class _GreatMultiselectState extends State<GreatMultiselect> {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint("build GreatMultiselect");
     return widget.clearSelectionOnPop
         ? WillPopScope(
             onWillPop: () async {
@@ -166,7 +168,7 @@ class _GreatMultiselectState extends State<GreatMultiselect> {
   MultiselectScope _buildMultiselectScope() =>
       MultiselectScope(child: widget.child, controller: widget.controller);
 
-  _updateController(GreatMultiselect oldWidget) {
+  void _updateController(GreatMultiselect oldWidget) {
     //_hashesCopy = widget.dataSource.map((e) => e.hashCode).toList();
 
     final newHashesCopy = _createHashesCopy();
