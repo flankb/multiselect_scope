@@ -14,7 +14,6 @@ enum SelectionEvent {
 }
 
 class MultiselectController extends ChangeNotifier {
-  //bool _selectionAttached = false;
   List<int> _selectedIndexes = [];
 
   List<int> get selectedIndexes => _selectedIndexes;
@@ -22,7 +21,7 @@ class MultiselectController extends ChangeNotifier {
 
   int _itemsCount;
 
-  select(int index, {SelectionEvent event = SelectionEvent.auto}) {
+  void select(int index, {SelectionEvent event = SelectionEvent.auto}) {
     final indexContains = _selectedIndexes.contains(index);
     final computedEvent = event == SelectionEvent.auto
         ? indexContains ? SelectionEvent.unselect : SelectionEvent.select
@@ -47,16 +46,16 @@ class MultiselectController extends ChangeNotifier {
     return selectedItems;
   }
 
-  clearSelection() {
+  void clearSelection() {
     if (selectedIndexes.any((element) => true)) {
       selectedIndexes.clear();
       notifyListeners();
     }
   }
 
-  invertSelection() {}
+  void invertSelection() {}
 
-  selectAll() {
+  void selectAll() {
     _selectedIndexes = List<int>.generate(_itemsCount, (i) => i);
     notifyListeners();
   }
@@ -65,7 +64,7 @@ class MultiselectController extends ChangeNotifier {
     return _selectedIndexes.contains(i);
   }
 
-  _setItemsCount(int itemsCount) {
+  void _setItemsCount(int itemsCount) {
     _itemsCount = itemsCount;
   }
 
@@ -149,7 +148,7 @@ class _GreatMultiselectState extends State<GreatMultiselect> {
 
   @override
   Widget build(BuildContext context) {
-    debugPrint("build GreatMultiselect");
+    debugPrint('build GreatMultiselect');
     return widget.clearSelectionOnPop
         ? WillPopScope(
             onWillPop: () async {
