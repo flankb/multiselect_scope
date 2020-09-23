@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:multiselect_scope/multiselect.dart';
 import 'package:multiselect_scope/multiselect_scope.dart';
 
 void main() {
@@ -64,7 +63,7 @@ class _MyHomePageState extends State<MyHomePage> {
     //   debugPrint("Custom listener invoked!");
     // });
 
-    _items = List.generate(10, (index) => "Item $index");
+    _items = List.generate(10, (index) => 'Item $index');
   }
 
   // void _incrementCounter() {
@@ -94,12 +93,12 @@ class _MyHomePageState extends State<MyHomePage> {
         // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
       ),
-      body: GreatMultiselect<String>(
+      body: MultiselectScope<String>(
         controller: _multiselectController,
         dataSource: _items,
         clearSelectionOnPop: true,
         onSelectionChanged: (indexes) {
-          debugPrint("Custom listener invoked! $indexes");
+          debugPrint('Custom listener invoked! $indexes');
         },
         child: Padding(
           padding: const EdgeInsets.all(8.0),
@@ -110,7 +109,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: ListView.builder(
                     itemCount: _items.length,
                     itemBuilder: (context, index) {
-                      final controller = GreatMultiselect.of(
+                      final controller = MultiselectScope.of(
                           context); //MultiselectScope.of(context);
 
                       final itemIsSelected = controller.indexIsSelected(index);
@@ -122,7 +121,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           }
                         },
                         onTap: () {
-                          debugPrint("Item is selected: $itemIsSelected");
+                          debugPrint('Item is selected: $itemIsSelected');
 
                           if (controller.selectionAttached) {
                             controller.select(index);
@@ -148,18 +147,18 @@ class _MyHomePageState extends State<MyHomePage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   RawMaterialButton(
-                    child: Text("Add"),
+                    child: Text('Add'),
                     fillColor: Colors.lightGreen,
                     onPressed: () {
                       setState(() {
-                        final randItem = "RandItem";
+                        final randItem = 'RandItem';
                         _items.insert(3, randItem);
                       });
                     },
                   ),
                   RawMaterialButton(
                     fillColor: Colors.blueGrey,
-                    child: Text("Удалить"),
+                    child: Text('Удалить'),
                     onPressed: () {
                       setState(() {
                         final itemsToRemove =
@@ -196,7 +195,7 @@ class Rectangle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    debugPrint("build Rectangle");
+    debugPrint('build Rectangle');
 
     return Container(
       height: 50,
@@ -216,7 +215,7 @@ class RectangleStateful extends StatefulWidget {
 class _RectangleStatefulState extends State<RectangleStateful> {
   @override
   Widget build(BuildContext context) {
-    debugPrint("build Rectangle stateful");
+    debugPrint('build Rectangle stateful');
 
     return Container(
       height: 50,

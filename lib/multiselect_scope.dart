@@ -60,8 +60,8 @@ class MultiselectController extends ChangeNotifier {
     notifyListeners();
   }
 
-  bool indexIsSelected(int i) {
-    return _selectedIndexes.contains(i);
+  bool indexIsSelected(int index) {
+    return _selectedIndexes.contains(index);
   }
 
   void _setItemsCount(int itemsCount) {
@@ -85,13 +85,15 @@ class MultiselectScope<T> extends StatefulWidget {
 
   MultiselectScope({
     Key key,
-    @required this.child,
+    @required this.controller,
     @required this.dataSource,
     this.onSelectionChanged,
-    this.controller,
     this.clearSelectionOnPop = false,
     this.preserveSelectedIndexesBetweenUpdates = true,
+    @required this.child,
   })  : assert(dataSource != null),
+        assert(child != null),
+        assert(controller != null),
         super(key: key);
 
   @override
