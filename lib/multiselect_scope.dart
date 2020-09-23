@@ -70,15 +70,12 @@ class MultiselectController extends ChangeNotifier {
 
   void _setSelectedIndexes(List<int> newIndexes) {
     _selectedIndexes = newIndexes;
-    //notifyListeners();
   }
 }
 
 typedef SelectionChangedCallback = void Function(List<int> selectedIndexes);
 
-typedef SelectedItemBuilder = G Function<G>(int index);
-
-class GreatMultiselect<T> extends StatefulWidget {
+class MultiselectScope<T> extends StatefulWidget {
   final Widget child;
   final SelectionChangedCallback onSelectionChanged;
   final MultiselectController controller;
@@ -86,7 +83,7 @@ class GreatMultiselect<T> extends StatefulWidget {
   final bool clearSelectionOnPop;
   final bool preserveSelectedIndexesBetweenUpdates;
 
-  GreatMultiselect({
+  MultiselectScope({
     Key key,
     @required this.child,
     @required this.dataSource,
@@ -98,23 +95,23 @@ class GreatMultiselect<T> extends StatefulWidget {
         super(key: key);
 
   @override
-  _GreatMultiselectState createState() => _GreatMultiselectState();
+  _MultiselectScopeState createState() => _MultiselectScopeState();
 
   static MultiselectController of(BuildContext context) {
     return context
-        .dependOnInheritedWidgetOfExactType<MultiselectScope>()
+        .dependOnInheritedWidgetOfExactType<_InheritedMultiselectNotifier>()
         .controller;
   }
 }
 
-class _GreatMultiselectState extends State<GreatMultiselect> {
+class _MultiselectScopeState extends State<MultiselectScope> {
   List<int> _hashesCopy;
 
   @override
   void initState() {
     super.initState();
 
-    debugPrint("_GreatMultiselectState init()");
+    debugPrint('_GreatMultiselectState init()');
 
     _hashesCopy = _createHashesCopy();
     widget.controller._setItemsCount(widget.dataSource.length);
@@ -131,8 +128,8 @@ class _GreatMultiselectState extends State<GreatMultiselect> {
   }
 
   @override
-  void didUpdateWidget(GreatMultiselect oldWidget) {
-    debugPrint("didUpdateWidget GreatMultiselect");
+  void didUpdateWidget(MultiselectScope oldWidget) {
+    debugPrint('didUpdateWidget GreatMultiselect');
     if (widget.preserveSelectedIndexesBetweenUpdates) {
       _updateController(oldWidget);
     }
@@ -164,10 +161,11 @@ class _GreatMultiselectState extends State<GreatMultiselect> {
         : _buildMultiselectScope();
   }
 
-  MultiselectScope _buildMultiselectScope() =>
-      MultiselectScope(child: widget.child, controller: widget.controller);
+  _InheritedMultiselectNotifier _buildMultiselectScope() =>
+      _InheritedMultiselectNotifier(
+          child: widget.child, controller: widget.controller);
 
-  void _updateController(GreatMultiselect oldWidget) {
+  void _updateController(MultiselectScope oldWidget) {
     //_hashesCopy = widget.dataSource.map((e) => e.hashCode).toList();
 
     final newHashesCopy = _createHashesCopy();
@@ -194,16 +192,11 @@ class _GreatMultiselectState extends State<GreatMultiselect> {
   }
 }
 
-class MultiselectScope extends InheritedNotifier<MultiselectController> {
+class _InheritedMultiselectNotifier
+    extends InheritedNotifier<MultiselectController> {
   final MultiselectController controller;
 
-  const MultiselectScope(
+  const _InheritedMultiselectNotifier(
       {Key key, @required Widget child, @required this.controller})
       : super(key: key, child: child, notifier: controller);
-
-  static MultiselectController of(BuildContext context) {
-    return context
-        .dependOnInheritedWidgetOfExactType<MultiselectScope>()
-        .controller;
-  }
 }
