@@ -99,8 +99,10 @@ class _MyHomePageState extends State<MyHomePage> {
         controller: _multiselectController,
         dataSource: _items,
         clearSelectionOnPop: true,
-        onSelectionChanged: (indexes) {
-          debugPrint('Custom listener invoked! $indexes');
+        onSelectionChanged: (indexes, items) {
+          debugPrint(
+              'Custom listener invoked! Indexes: $indexes Items: $items');
+          return;
         },
         child: Padding(
           padding: const EdgeInsets.all(8.0),
@@ -175,8 +177,9 @@ class _MyHomePageState extends State<MyHomePage> {
                     child: Text('Delete'),
                     onPressed: () {
                       setState(() {
-                        final itemsToRemove =
-                            _multiselectController.getSelectedItems(_items);
+                        final itemsToRemove = _multiselectController
+                            .getSelectedItems()
+                            .cast<String>();
 
                         //_multiselectController.clearSelection();
 

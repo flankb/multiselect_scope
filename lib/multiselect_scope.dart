@@ -15,6 +15,7 @@ enum SelectionEvent {
 
 class MultiselectController extends ChangeNotifier {
   List<int> _selectedIndexes = [];
+  List _dataSource = [];
 
   List<int> get selectedIndexes => _selectedIndexes;
   bool get selectionAttached => _selectedIndexes.any((element) => true);
@@ -24,7 +25,9 @@ class MultiselectController extends ChangeNotifier {
   void select(int index, {SelectionEvent event = SelectionEvent.auto}) {
     final indexContains = _selectedIndexes.contains(index);
     final computedEvent = event == SelectionEvent.auto
-        ? indexContains ? SelectionEvent.unselect : SelectionEvent.select
+        ? indexContains
+            ? SelectionEvent.unselect
+            : SelectionEvent.select
         : event;
 
     if (computedEvent == SelectionEvent.select) {
@@ -40,8 +43,15 @@ class MultiselectController extends ChangeNotifier {
     }
   }
 
-  List<T> getSelectedItems<T>(List<T> allItems) {
-    final selectedItems = selectedIndexes.map((e) => allItems[e]).toList();
+  // @deprecated
+  // List<T> getSelectedItems<T>(List<T> allItems) {
+  //   final selectedItems = selectedIndexes.map((e) => allItems[e]).toList();
+
+  //   return selectedItems;
+  // }
+
+  List getSelectedItems() {
+    final selectedItems = selectedIndexes.map((e) => _dataSource[e]).toList();
 
     return selectedItems;
   }
@@ -64,8 +74,14 @@ class MultiselectController extends ChangeNotifier {
     return _selectedIndexes.contains(index);
   }
 
+  @deprecated
   void _setItemsCount(int itemsCount) {
     _itemsCount = itemsCount;
+  }
+
+  void _setDataSource(List dataSource) {
+    _dataSource = dataSource;
+    _itemsCount = dataSource.length;
   }
 
   void _setSelectedIndexes(List<int> newIndexes) {
@@ -73,11 +89,14 @@ class MultiselectController extends ChangeNotifier {
   }
 }
 
-typedef SelectionChangedCallback = void Function(List<int> selectedIndexes);
+typedef SelectionChangedCallback<T> = void Function(
+    List<int> selectedIndexes, List<T> selectedItems);
+//typedef SelectionItemsChangedCallback = void Function(List selectedItems);
+//List<int> intList2 = dynList.cast<int>();
 
 class MultiselectScope<T> extends StatefulWidget {
   final Widget child;
-  final SelectionChangedCallback onSelectionChanged;
+  final SelectionChangedCallback<T> onSelectionChanged;
   final MultiselectController controller;
   final List<T> dataSource;
   final bool clearSelectionOnPop;
@@ -99,7 +118,7 @@ class MultiselectScope<T> extends StatefulWidget {
         super(key: key);
 
   @override
-  _MultiselectScopeState createState() => _MultiselectScopeState();
+  _MultiselectScopeState<T> createState() => _MultiselectScopeState<T>();
 
   static MultiselectController of(BuildContext context) {
     return context
@@ -108,7 +127,7 @@ class MultiselectScope<T> extends StatefulWidget {
   }
 }
 
-class _MultiselectScopeState extends State<MultiselectScope> {
+class _MultiselectScopeState<T> extends State<MultiselectScope<T>> {
   List<int> _hashesCopy;
 
   @override
@@ -118,11 +137,13 @@ class _MultiselectScopeState extends State<MultiselectScope> {
     debugPrint('_GreatMultiselectState init()');
 
     _hashesCopy = _createHashesCopy();
-    widget.controller._setItemsCount(widget.dataSource.length);
+    //widget.controller._setItemsCount(widget.dataSource.length);
+    widget.controller._setDataSource(widget.dataSource);
 
     if (widget.onSelectionChanged != null) {
       widget.controller.addListener(() {
-        widget.onSelectionChanged.call(widget.controller.selectedIndexes);
+        widget.onSelectionChanged.call(widget.controller.selectedIndexes,
+            widget.controller.getSelectedItems().cast<T>());
       });
     }
   }
@@ -189,7 +210,9 @@ class _MultiselectScopeState extends State<MultiselectScope> {
       }
     });
 
-    widget.controller._setItemsCount(widget.dataSource.length);
+    // widget.controller._setItemsCount(widget.dataSource.length);
+
+    widget.controller._setDataSource(widget.dataSource);
     widget.controller._setSelectedIndexes(newIndexes);
 
     _hashesCopy = newHashesCopy;
