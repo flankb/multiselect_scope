@@ -14,9 +14,15 @@ enum SelectionEvent {
 }
 
 class MultiselectController extends ChangeNotifier {
+  //List<int> _previousSelectedIndexes = [];
   List<int> _selectedIndexes = [];
+  List<int> _addedIndexes = [];
+  List<int> _removedIndexes = [];
 
   List<int> get selectedIndexes => _selectedIndexes;
+  List<int> get addedIndexes => _addedIndexes;
+  List<int> get removedIndexes => _removedIndexes;
+
   bool get selectionAttached => _selectedIndexes.any((element) => true);
 
   int _itemsCount;
@@ -24,17 +30,23 @@ class MultiselectController extends ChangeNotifier {
   void select(int index, {SelectionEvent event = SelectionEvent.auto}) {
     final indexContains = _selectedIndexes.contains(index);
     final computedEvent = event == SelectionEvent.auto
-        ? indexContains ? SelectionEvent.unselect : SelectionEvent.select
+        ? indexContains
+            ? SelectionEvent.unselect
+            : SelectionEvent.select
         : event;
 
     if (computedEvent == SelectionEvent.select) {
       if (!indexContains) {
         _selectedIndexes.add(index);
+        _updateOnlyAddedIndexes([index]);
+
         notifyListeners();
       }
     } else if (computedEvent == SelectionEvent.unselect) {
       if (indexContains) {
         _selectedIndexes.remove(index);
+        _updateOnlyRemovedIndexes([index]);
+
         notifyListeners();
       }
     }
@@ -48,6 +60,8 @@ class MultiselectController extends ChangeNotifier {
 
   void clearSelection() {
     if (selectedIndexes.any((element) => true)) {
+      _updateOnlyRemovedIndexes(List<int>.from(_selectedIndexes));
+
       selectedIndexes.clear();
       notifyListeners();
     }
@@ -56,7 +70,14 @@ class MultiselectController extends ChangeNotifier {
   void invertSelection() {}
 
   void selectAll() {
+    final preselectIndexes = _selectedIndexes;
+
     _selectedIndexes = List<int>.generate(_itemsCount, (i) => i);
+
+    final addedIndexes =
+        _selectedIndexes.toSet().difference(preselectIndexes.toSet()).toList();
+    _updateOnlyAddedIndexes(addedIndexes);
+
     notifyListeners();
   }
 
@@ -68,12 +89,24 @@ class MultiselectController extends ChangeNotifier {
     _itemsCount = itemsCount;
   }
 
-  void _setSelectedIndexes(List<int> newIndexes) {
+  void _setSelectedIndexes(List<int> newIndexes, List<int> newAddedIndexes,
+      List<int> newRemovedIndexes) {
     _selectedIndexes = newIndexes;
+  }
+
+  void _updateOnlyAddedIndexes(List<int> addedIndexes) {
+    _removedIndexes = [];
+    _addedIndexes = addedIndexes;
+  }
+
+  void _updateOnlyRemovedIndexes(List<int> removedIndexes) {
+    _removedIndexes = removedIndexes;
+    _addedIndexes = [];
   }
 }
 
-typedef SelectionChangedCallback = void Function(List<int> selectedIndexes);
+typedef SelectionChangedCallback = void Function(List<int> selectedIndexes,
+    List<int> addedIndexes, List<int> removedIndexes);
 
 class MultiselectScope<T> extends StatefulWidget {
   final Widget child;
@@ -120,9 +153,16 @@ class _MultiselectScopeState extends State<MultiselectScope> {
     _hashesCopy = _createHashesCopy();
     widget.controller._setItemsCount(widget.dataSource.length);
 
+    if (widget.initialSelectedIndexes != null) {
+      widget.controller
+          ._setSelectedIndexes(widget.initialSelectedIndexes, [], []);
+    }
+
     if (widget.onSelectionChanged != null) {
       widget.controller.addListener(() {
-        widget.onSelectionChanged.call(widget.controller.selectedIndexes);
+        final controller = widget.controller;
+        widget.onSelectionChanged.call(controller.selectedIndexes,
+            controller.addedIndexes, controller.removedIndexes);
       });
     }
   }
@@ -173,12 +213,24 @@ class _MultiselectScopeState extends State<MultiselectScope> {
     //_hashesCopy = widget.dataSource.map((e) => e.hashCode).toList();
 
     final newHashesCopy = _createHashesCopy();
+    final controller = widget.controller;
 
     //debugPrint(
     //    "Old dataSource: ${_hashesCopy} new dataSource: ${newHashesCopy}");
 
     final oldSelectedHashes =
-        widget.controller.selectedIndexes.map((e) => _hashesCopy[e]).toList();
+        controller.selectedIndexes.map((e) => _hashesCopy[e]).toList();
+
+    final oldAddedHashes =
+        controller.addedIndexes.map((e) => _hashesCopy[e]).toList();
+
+    // TODO Нет возможности вычислить индексы исчесзувших (удалённые) элементы!
+    // Но при этом вызывающий код должен знать, какие эелементы больше не выделены!
+    // Поэтому функционал added/removed крайне сложно реализуем в варианте сохранения
+    // между обновлениями источника данных, обработку актуальных выделенных элементов
+    // следует возложить на вызывающий код
+    final oldRemovedHashed =
+        controller.removedIndexes.map((e) => _hashesCopy[e]).toList();
 
     final newIndexes = <int>[];
     newHashesCopy.asMap().forEach((index, value) {
@@ -190,7 +242,10 @@ class _MultiselectScopeState extends State<MultiselectScope> {
     });
 
     widget.controller._setItemsCount(widget.dataSource.length);
-    widget.controller._setSelectedIndexes(newIndexes);
+
+    // Пересчитаем добавленные и удаленные индексы
+
+    widget.controller._setSelectedIndexes(newIndexes, [], []);
 
     _hashesCopy = newHashesCopy;
   }
