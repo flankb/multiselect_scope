@@ -43,13 +43,6 @@ class MultiselectController extends ChangeNotifier {
     }
   }
 
-  // @deprecated
-  // List<T> getSelectedItems<T>(List<T> allItems) {
-  //   final selectedItems = selectedIndexes.map((e) => allItems[e]).toList();
-
-  //   return selectedItems;
-  // }
-
   List getSelectedItems() {
     final selectedItems = selectedIndexes.map((e) => _dataSource[e]).toList();
 
@@ -63,7 +56,14 @@ class MultiselectController extends ChangeNotifier {
     }
   }
 
-  void invertSelection() {}
+  void invertSelection() {
+    _selectedIndexes = List<int>.generate(_itemsCount, (i) => i)
+        .toSet()
+        .difference(_selectedIndexes.toSet())
+        .toList();
+
+    notifyListeners();
+  }
 
   void selectAll() {
     _selectedIndexes = List<int>.generate(_itemsCount, (i) => i);
@@ -100,7 +100,7 @@ class MultiselectScope<T> extends StatefulWidget {
   final MultiselectController controller;
   final List<T> dataSource;
   final bool clearSelectionOnPop;
-  final bool preserveSelectedIndexesBetweenUpdates;
+  final bool preserveSelectedItemsBetweenUpdates;
   final List<int> initialSelectedIndexes;
 
   MultiselectScope({
@@ -109,7 +109,7 @@ class MultiselectScope<T> extends StatefulWidget {
     @required this.dataSource,
     this.onSelectionChanged,
     this.clearSelectionOnPop = false,
-    this.preserveSelectedIndexesBetweenUpdates = true,
+    this.preserveSelectedItemsBetweenUpdates = true,
     @required this.child,
     this.initialSelectedIndexes,
   })  : assert(dataSource != null),
@@ -137,8 +137,11 @@ class _MultiselectScopeState<T> extends State<MultiselectScope<T>> {
     debugPrint('_GreatMultiselectState init()');
 
     _hashesCopy = _createHashesCopy();
-    //widget.controller._setItemsCount(widget.dataSource.length);
     widget.controller._setDataSource(widget.dataSource);
+
+    if (widget.initialSelectedIndexes != null) {
+      widget.controller._setSelectedIndexes(widget.initialSelectedIndexes);
+    }
 
     if (widget.onSelectionChanged != null) {
       widget.controller.addListener(() {
@@ -155,7 +158,7 @@ class _MultiselectScopeState<T> extends State<MultiselectScope<T>> {
   @override
   void didUpdateWidget(MultiselectScope oldWidget) {
     debugPrint('didUpdateWidget GreatMultiselect');
-    if (widget.preserveSelectedIndexesBetweenUpdates) {
+    if (widget.preserveSelectedItemsBetweenUpdates) {
       _updateController(oldWidget);
     }
 
