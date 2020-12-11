@@ -7,6 +7,28 @@ import 'package:multiselect_scope/multiselect_scope.dart';
 void main() {
   testWidgets('Multiselect test', (WidgetTester tester) async {
     await tester.pumpWidget(MyAppTest());
+
+    final state =
+        tester.state(find.byType(MyHomePageTest)) as _MyHomePageTestState;
+    debugPrint(state.items.toString());
+
+    // 1. Убедиться, что выделены 2 элемента (1 и 3)
+
+    // 2. Кликнуть на 7-м эелементе, убедиться, что он выделился
+
+    // 3. Кликнуть на кнопку Invert , убедиться, что другие элементы выделены
+
+    // 4. Кликнуть на кнопку Select all, убедиться, что все элементы выделены
+
+    // 5. Инвертировать (теперь список элементов пуст)
+
+    // 6. Выделить 4 и 7 элементы нажать на кнопку Add rand, Убедиться, что остались выделены те же эелементы
+
+    // 7.  Нажать кнопку Remove rand, убедиться, что остались выделены те же элементы (если один из них не выделен, то возможно удален)
+
+    // 8. Нажать кнопку Clear, убедиться, что список пуст
+
+    // 9. Выделить 3 элемент, нажать кнопку Delete, убедиться, что он удалился
   });
 }
 
@@ -34,17 +56,17 @@ class MyHomePageTest extends StatefulWidget {
 }
 
 class _MyHomePageTestState extends State<MyHomePageTest> {
-  List<String> _items;
-  MultiselectController _multiselectController;
+  List<String> items;
+  MultiselectController multiselectController;
   Random random;
 
   @override
   void initState() {
     super.initState();
     random = Random();
-    _items = List.generate(10, (index) => 'Item $index');
+    items = List.generate(10, (index) => 'Item $index');
 
-    _multiselectController = MultiselectController();
+    multiselectController = MultiselectController();
   }
 
   @override
@@ -54,8 +76,8 @@ class _MyHomePageTestState extends State<MyHomePageTest> {
         title: Text(widget.title),
       ),
       body: MultiselectScope<String>(
-        controller: _multiselectController,
-        dataSource: _items,
+        controller: multiselectController,
+        dataSource: items,
         clearSelectionOnPop: true,
         initialSelectedIndexes: [1, 3],
         onSelectionChanged: (indexes, items) {
@@ -70,7 +92,7 @@ class _MyHomePageTestState extends State<MyHomePageTest> {
             children: <Widget>[
               Expanded(
                 child: ListView.builder(
-                    itemCount: _items.length,
+                    itemCount: items.length,
                     itemBuilder: (context, index) {
                       final controller = MultiselectScope.of(
                           context); //MultiselectScope.of(context);
@@ -97,7 +119,7 @@ class _MyHomePageTestState extends State<MyHomePageTest> {
                                 ? Theme.of(context).primaryColor
                                 : null,
                             child: Text(
-                              _items[index],
+                              items[index],
                               style: TextStyle(fontSize: 22),
                             ),
                           ),
@@ -116,10 +138,10 @@ class _MyHomePageTestState extends State<MyHomePageTest> {
                         final randItem =
                             'RandItem' + random.nextInt(256).toString();
 
-                        final randomIndex = _items.isEmpty
+                        final randomIndex = items.isEmpty
                             ? 0
-                            : random.nextInt(_items.length - 1);
-                        _items.insert(randomIndex,
+                            : random.nextInt(items.length - 1);
+                        items.insert(randomIndex,
                             randItem); // TODO Fix after delete all!
                       });
                     },
@@ -130,10 +152,10 @@ class _MyHomePageTestState extends State<MyHomePageTest> {
                     fillColor: Colors.lightGreen,
                     onPressed: () {
                       setState(() {
-                        if (_items.length == 1) {
-                          _items.removeAt(0);
+                        if (items.length == 1) {
+                          items.removeAt(0);
                         } else {
-                          _items.removeAt(random.nextInt(_items.length - 1));
+                          items.removeAt(random.nextInt(items.length - 1));
                         }
                       });
                     },
@@ -144,11 +166,11 @@ class _MyHomePageTestState extends State<MyHomePageTest> {
                     child: Text('Delete'),
                     onPressed: () {
                       setState(() {
-                        final itemsToRemove = _multiselectController
+                        final itemsToRemove = multiselectController
                             .getSelectedItems()
                             .cast<String>();
 
-                        _items = _items
+                        items = items
                             .where(
                                 (element) => !itemsToRemove.contains(element))
                             .toList();
@@ -161,7 +183,7 @@ class _MyHomePageTestState extends State<MyHomePageTest> {
                     fillColor: Colors.lightGreen,
                     onPressed: () {
                       setState(() {
-                        _multiselectController.select(0);
+                        multiselectController.select(0);
                       });
                     },
                   ),
@@ -171,7 +193,7 @@ class _MyHomePageTestState extends State<MyHomePageTest> {
                     fillColor: Colors.amber,
                     onPressed: () {
                       setState(() {
-                        _multiselectController.selectAll();
+                        multiselectController.selectAll();
                       });
                     },
                   ),
@@ -181,7 +203,7 @@ class _MyHomePageTestState extends State<MyHomePageTest> {
                     fillColor: Colors.tealAccent,
                     onPressed: () {
                       setState(() {
-                        _multiselectController.invertSelection();
+                        multiselectController.invertSelection();
                       });
                     },
                   ),
@@ -191,7 +213,7 @@ class _MyHomePageTestState extends State<MyHomePageTest> {
                     fillColor: Colors.deepPurpleAccent,
                     onPressed: () {
                       setState(() {
-                        _multiselectController.clearSelection();
+                        multiselectController.clearSelection();
                       });
                     },
                   ),
