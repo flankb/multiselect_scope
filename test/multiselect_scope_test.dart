@@ -4,7 +4,36 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:multiselect_scope/multiselect_scope.dart';
 
+extension on List {
+  bool containsAll(Iterable items) {
+    items.forEach((element) {
+      if (!this.contains(element)) {
+        return false;
+      }
+    });
+
+    return true;
+  }
+
+  bool notContainsAll(Iterable items) {
+    items.forEach((element) {
+      if (this.contains(element)) {
+        return false;
+      }
+    });
+
+    return true;
+  }
+}
+
 void main() {
+  List<String> _stateItems;
+
+  void _updateStateItems(_MyHomePageTestState stateBy) {
+    _stateItems =
+        stateBy.multiselectController.getSelectedItems().cast<String>();
+  }
+
   testWidgets('Multiselect test', (WidgetTester tester) async {
     await tester.pumpWidget(MyAppTest());
 
@@ -12,23 +41,97 @@ void main() {
         tester.state(find.byType(MyHomePageTest)) as _MyHomePageTestState;
     debugPrint(state.items.toString());
 
-    // 1. Убедиться, что выделены 2 элемента (1 и 3)
+    // 1. Ensure that two starting elements was selected
+    _updateStateItems(state);
+    expect(_stateItems.contains('Item 1'), true);
+    expect(_stateItems.contains('Item 3'), true);
 
-    // 2. Кликнуть на 7-м эелементе, убедиться, что он выделился
+    // 2. Click on the 7th element, make sure it is selected
+    await tester.tap(find.text('Item 7'));
+    await tester.pump();
+    _updateStateItems(state);
+
+    expect(_stateItems.contains('Item 7'), true);
+    expect(state.selectedItemsTrack.containsAll(['Item 7', 'Item 1', 'Item 3']),
+        true);
 
     // 3. Кликнуть на кнопку Invert , убедиться, что другие элементы выделены
+    await tester.tap(find.text('Invert'));
+    await tester.pump();
+    _updateStateItems(state);
+
+    expect(
+        _stateItems.containsAll(
+            state.items.toSet().difference({'Item 7', 'Item 1', 'Item 3'})),
+        true);
+    expect(state.selectedIndexesTrack.containsAll([0, 2, 5]), true);
+    expect(state.selectedIndexesTrack.notContainsAll([7, 1, 3]), true);
 
     // 4. Кликнуть на кнопку Select all, убедиться, что все элементы выделены
+    await tester.tap(find.text('Select all'));
+    await tester.pump();
+    _updateStateItems(state);
+
+    expect(_stateItems.containsAll(state.items.toSet()), true);
 
     // 5. Инвертировать (теперь список элементов пуст)
+    await tester.tap(find.text('Invert'));
+    await tester.pump();
+    _updateStateItems(state);
+
+    expect(
+        _stateItems.isEmpty &&
+            state.selectedIndexesTrack.isEmpty &&
+            state.selectedItemsTrack.isEmpty,
+        true);
 
     // 6. Выделить 4 и 7 элементы нажать на кнопку Add rand, Убедиться, что остались выделены те же эелементы
+    await tester.tap(find.text('Item 4'));
+    await tester.tap(find.text('Item 7'));
+    await tester.pump();
+
+    await tester.tap(find.text('Add rand'));
+    await tester.pump();
+
+    _updateStateItems(state);
+
+    final preselected = ['Item 4', 'Item 7'];
+    expect(state.selectedItemsTrack.containsAll(preselected), true);
+    expect(_stateItems.containsAll(preselected), true);
 
     // 7.  Нажать кнопку Remove rand, убедиться, что остались выделены те же элементы (если один из них не выделен, то возможно удален)
+    await tester.tap(find.text('Remove rand'));
+    await tester.pump();
+    _updateStateItems(state);
+
+    preselected.forEach((String preselectedItem) {
+      if (state.items.contains(preselectedItem)) {
+        expect(_stateItems.containsAll(preselected), true);
+      }
+      ;
+    });
 
     // 8. Нажать кнопку Clear, убедиться, что список пуст
+    await tester.tap(find.text('Clear'));
+    await tester.pump();
+    _updateStateItems(state);
+
+    expect(
+        _stateItems.isEmpty &&
+            state.selectedIndexesTrack.isEmpty &&
+            state.selectedItemsTrack.isEmpty,
+        true);
 
     // 9. Выделить 3 элемент, нажать кнопку Delete, убедиться, что он удалился
+    await tester.longPress(find.text('Item 3'));
+    await tester.pump();
+    _updateStateItems(state);
+
+    await tester.tap(find.text('Delete'));
+    await tester.pump();
+    _updateStateItems(state);
+
+    expect(state.items.contains('Item 3'), false);
   });
 }
 
@@ -57,6 +160,9 @@ class MyHomePageTest extends StatefulWidget {
 
 class _MyHomePageTestState extends State<MyHomePageTest> {
   List<String> items;
+  List<String> selectedItemsTrack;
+  List<int> selectedIndexesTrack;
+
   MultiselectController multiselectController;
   Random random;
 
@@ -81,6 +187,9 @@ class _MyHomePageTestState extends State<MyHomePageTest> {
         clearSelectionOnPop: true,
         initialSelectedIndexes: [1, 3],
         onSelectionChanged: (indexes, items) {
+          selectedItemsTrack = items;
+          selectedIndexesTrack = indexes;
+
           debugPrint(
               'Custom listener invoked! Indexes: $indexes Items: $items');
           return;
