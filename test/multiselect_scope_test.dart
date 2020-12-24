@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:multiselect_scope/multiselect_scope.dart';
+import 'package:collection/collection.dart';
 
 extension on List {
   bool containsAll(Iterable items) {
@@ -132,6 +133,19 @@ void main() {
     _updateStateItems(state);
 
     expect(state.items.contains('Item 3'), false);
+
+    final stateIndexes = List.from(state.selectedIndexesTrack);
+
+    await tester.tap(find.text('No keep'));
+    await tester.pump();
+
+    await tester.tap(find.text('Add rand'));
+    await tester.pump();
+
+    _updateStateItems(state);
+
+    Function eq = const ListEquality().equals;
+    expect(eq(stateIndexes, state.selectedIndexesTrack), true);
   });
 }
 
@@ -162,6 +176,7 @@ class _MyHomePageTestState extends State<MyHomePageTest> {
   List<String> items;
   List<String> selectedItemsTrack;
   List<int> selectedIndexesTrack;
+  bool keepSelectedIndexes;
 
   MultiselectController multiselectController;
   Random random;
@@ -169,6 +184,7 @@ class _MyHomePageTestState extends State<MyHomePageTest> {
   @override
   void initState() {
     super.initState();
+    keepSelectedIndexes = true;
     random = Random();
     items = List.generate(10, (index) => 'Item $index');
 
@@ -186,6 +202,7 @@ class _MyHomePageTestState extends State<MyHomePageTest> {
         dataSource: items,
         clearSelectionOnPop: true,
         initialSelectedIndexes: [1, 3],
+        keepSelectedItemsBetweenUpdates: keepSelectedIndexes,
         onSelectionChanged: (indexes, items) {
           selectedItemsTrack = items;
           selectedIndexesTrack = indexes;
@@ -206,7 +223,7 @@ class _MyHomePageTestState extends State<MyHomePageTest> {
                       final controller = MultiselectScope.of(
                           context); //MultiselectScope.of(context);
 
-                      final itemIsSelected = controller.indexIsSelected(index);
+                      final itemIsSelected = controller.isSelected(index);
 
                       return InkWell(
                         onLongPress: () {
@@ -323,6 +340,16 @@ class _MyHomePageTestState extends State<MyHomePageTest> {
                     onPressed: () {
                       setState(() {
                         multiselectController.clearSelection();
+                      });
+                    },
+                  ),
+                  RawMaterialButton(
+                    padding: EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Text('No keep'),
+                    fillColor: Colors.deepPurpleAccent,
+                    onPressed: () {
+                      setState(() {
+                        keepSelectedIndexes = !keepSelectedIndexes;
                       });
                     },
                   ),
