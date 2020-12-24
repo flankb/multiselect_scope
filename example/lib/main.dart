@@ -54,6 +54,7 @@ class _MyHomePageState extends State<MyHomePage> {
         controller: _multiselectController,
         dataSource: _items,
         clearSelectionOnPop: true,
+        keepSelectedItemsBetweenUpdates: false,
         initialSelectedIndexes: [1, 3],
         onSelectionChanged: (indexes, items) {
           debugPrint(
@@ -72,7 +73,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       final controller = MultiselectScope.of(
                           context); //MultiselectScope.of(context);
 
-                      final itemIsSelected = controller.indexIsSelected(index);
+                      final itemIsSelected = controller.isSelected(index);
 
                       return InkWell(
                         onLongPress: () {
