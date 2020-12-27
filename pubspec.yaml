@@ -1,7 +1,6 @@
 name: multiselect_scope
-description: Package for multiselect items
-version: 0.0.1+3
-author:
+description: Package for multiple selection and tracking selected items (select all, clear, invert selection, etc.)
+version: 0.1.0
 homepage:
 
 environment:
