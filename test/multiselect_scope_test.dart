@@ -220,7 +220,7 @@ class _MyHomePageTestState extends State<MyHomePageTest> {
                 child: ListView.builder(
                     itemCount: items.length,
                     itemBuilder: (context, index) {
-                      final controller = MultiselectScope.of(
+                      final controller = MultiselectScope.controllerOf(
                           context); //MultiselectScope.of(context);
 
                       final itemIsSelected = controller.isSelected(index);
