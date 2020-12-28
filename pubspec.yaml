@@ -1,7 +1,7 @@
 name: multiselect_scope
 description: Package for multiple selection and tracking selected items (select all, clear, invert selection, etc.)
 version: 0.1.0
-homepage:
+homepage: https://github.com/flankb/multiselect_scope
 
 environment:
   sdk: ">=2.7.0 <3.0.0"
@@ -13,6 +13,8 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+
+  collection: ^1.14.13
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
