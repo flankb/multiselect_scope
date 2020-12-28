@@ -142,6 +142,7 @@ class MultiselectScope<T> extends StatefulWidget {
   MultiselectScope({
     Key key,
     @required this.dataSource,
+    // ignore: always_require_non_null_named_parameters
     this.controller,
     this.onSelectionChanged,
     this.clearSelectionOnPop = false,

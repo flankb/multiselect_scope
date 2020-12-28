@@ -146,6 +146,13 @@ void main() {
 
     Function eq = const ListEquality().equals;
     expect(eq(stateIndexes, state.selectedIndexesTrack), true);
+
+    // Test specified index selection
+    await tester.tap(find.text('Select specified'));
+    await tester.pump();
+    _updateStateItems(state);
+
+    expect(eq([0, 1, 2], state.selectedIndexesTrack), true);
   });
 }
 
@@ -350,6 +357,16 @@ class _MyHomePageTestState extends State<MyHomePageTest> {
                     onPressed: () {
                       setState(() {
                         keepSelectedIndexes = !keepSelectedIndexes;
+                      });
+                    },
+                  ),
+                  RawMaterialButton(
+                    padding: EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Text('Select specified'),
+                    fillColor: Colors.deepPurpleAccent,
+                    onPressed: () {
+                      setState(() {
+                        multiselectController.setSelectedIndexes([0, 1, 2]);
                       });
                     },
                   ),
