@@ -70,8 +70,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: ListView.builder(
                     itemCount: _items.length,
                     itemBuilder: (context, index) {
-                      final controller = MultiselectScope.controllerOf(
-                          context); //MultiselectScope.of(context);
+                      final controller = MultiselectScope.controllerOf(context);
 
                       final itemIsSelected = controller.isSelected(index);
 
@@ -202,44 +201,3 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 }
-
-final items = [];
-final multiselectController = MultiselectController();
-final r = MultiselectScope<String>(
-  controller: multiselectController,
-  dataSource: items,
-  clearSelectionOnPop: true,
-  keepSelectedItemsBetweenUpdates: false,
-  initialSelectedIndexes: [1, 3],
-  onSelectionChanged: (indexes, items) {},
-  child: ListView.builder(
-      itemCount: items.length,
-      itemBuilder: (context, index) {
-        final controller = MultiselectScope.controllerOf(context);
-
-        final itemIsSelected = controller.isSelected(index);
-
-        return InkWell(
-          onLongPress: () {
-            if (!controller.selectionAttached) {
-              controller.select(index);
-            }
-          },
-          onTap: () {
-            if (controller.selectionAttached) {
-              controller.select(index);
-            }
-          },
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Container(
-              color: itemIsSelected ? Theme.of(context).primaryColor : null,
-              child: Text(
-                items[index],
-                style: TextStyle(fontSize: 22),
-              ),
-            ),
-          ),
-        );
-      }),
-);
