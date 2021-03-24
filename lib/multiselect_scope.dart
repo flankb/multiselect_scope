@@ -94,8 +94,8 @@ class MultiselectController extends ChangeNotifier {
     _itemsCount = dataSource.length;
   }
 
-  void _setSelectedIndexes(List<int>? newIndexes, bool notifyListeners) {
-    _selectedIndexes = newIndexes ?? [];
+  void _setSelectedIndexes(List<int> newIndexes, bool notifyListeners) {
+    _selectedIndexes = newIndexes;
 
     if (notifyListeners) {
       this.notifyListeners();
@@ -149,7 +149,7 @@ class MultiselectScope<T> extends StatefulWidget {
     this.keepSelectedItemsBetweenUpdates = true,
     this.initialSelectedIndexes,
     required this.child,
-  })  : assert(dataSource != null),
+  })   : assert(dataSource != null),
         assert(child != null),
         assert(controller != null),
         super(key: key);
@@ -188,8 +188,8 @@ class _MultiselectScopeState<T> extends State<MultiselectScope<T?>> {
     _multiselectController!._setDataSource(widget.dataSource);
 
     if (widget.initialSelectedIndexes != null) {
-      _multiselectController!._setSelectedIndexes(
-          widget.initialSelectedIndexes, false);
+      _multiselectController!
+          ._setSelectedIndexes(widget.initialSelectedIndexes, false);
     }
 
     if (widget.onSelectionChanged != null) {
@@ -207,7 +207,7 @@ class _MultiselectScopeState<T> extends State<MultiselectScope<T?>> {
 
   @override
   void didUpdateWidget(MultiselectScope oldWidget) {
-    super.didUpdateWidget(oldWidget as MultiselectScope<T*>);
+    super.didUpdateWidget(oldWidget as MultiselectScope<T?>);
     //debugPrint('didUpdateWidget GreatMultiselect');
     if (widget.keepSelectedItemsBetweenUpdates!) {
       _updateController(oldWidget);
