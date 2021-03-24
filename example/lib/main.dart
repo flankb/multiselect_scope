@@ -22,18 +22,18 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
+  MyHomePage({Key? key, this.title}) : super(key: key);
 
-  final String title;
+  final String? title;
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  List<String> _items;
-  MultiselectController _multiselectController;
-  Random random;
+  late List<String> _items;
+  late MultiselectController _multiselectController;
+  late Random random;
 
   @override
   void initState() {
@@ -48,7 +48,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Text(widget.title!),
       ),
       body: MultiselectScope<String>(
         controller: _multiselectController,
@@ -70,7 +70,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: ListView.builder(
                     itemCount: _items.length,
                     itemBuilder: (context, index) {
-                      final controller = MultiselectScope.controllerOf(context);
+                      final controller = MultiselectScope.controllerOf(context)!;
 
                       final itemIsSelected = controller.isSelected(index);
 
