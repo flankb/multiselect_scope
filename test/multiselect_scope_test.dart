@@ -5,30 +5,30 @@ import 'package:flutter/material.dart';
 import 'package:multiselect_scope/multiselect_scope.dart';
 import 'package:collection/collection.dart';
 
-extension on List {
+extension on List? {
   bool containsAll(Iterable items) {
-    items.forEach((element) {
-      if (!this.contains(element)) {
+    for (var element in items) {
+      if (!this!.contains(element)) {
         return false;
       }
-    });
+    }
 
     return true;
   }
 
   bool notContainsAll(Iterable items) {
-    items.forEach((element) {
-      if (this.contains(element)) {
+    for (var element in items) {
+      if (this!.contains(element)) {
         return false;
       }
-    });
+    }
 
     return true;
   }
 }
 
 void main() {
-  List<String> _stateItems;
+  List<String>? _stateItems;
 
   void _updateStateItems(_MyHomePageTestState stateBy) {
     _stateItems =
@@ -44,15 +44,15 @@ void main() {
 
     // 1. Ensure that two starting elements was selected
     _updateStateItems(state);
-    expect(_stateItems.contains('Item 1'), true);
-    expect(_stateItems.contains('Item 3'), true);
+    expect(_stateItems!.contains('Item 1'), true);
+    expect(_stateItems!.contains('Item 3'), true);
 
     // 2. Click on the 7th element, make sure it is selected
     await tester.tap(find.text('Item 7'));
     await tester.pump();
     _updateStateItems(state);
 
-    expect(_stateItems.contains('Item 7'), true);
+    expect(_stateItems!.contains('Item 7'), true);
     expect(state.selectedItemsTrack.containsAll(['Item 7', 'Item 1', 'Item 3']),
         true);
 
@@ -81,9 +81,9 @@ void main() {
     _updateStateItems(state);
 
     expect(
-        _stateItems.isEmpty &&
-            state.selectedIndexesTrack.isEmpty &&
-            state.selectedItemsTrack.isEmpty,
+        _stateItems!.isEmpty &&
+            state.selectedIndexesTrack!.isEmpty &&
+            state.selectedItemsTrack!.isEmpty,
         true);
 
     // 6. Выделить 4 и 7 элементы нажать на кнопку Add rand, Убедиться, что остались выделены те же эелементы
@@ -118,9 +118,9 @@ void main() {
     _updateStateItems(state);
 
     expect(
-        _stateItems.isEmpty &&
-            state.selectedIndexesTrack.isEmpty &&
-            state.selectedItemsTrack.isEmpty,
+        _stateItems!.isEmpty &&
+            state.selectedIndexesTrack!.isEmpty &&
+            state.selectedItemsTrack!.isEmpty,
         true);
 
     // 9. Выделить 3 элемент, нажать кнопку Delete, убедиться, что он удалился
@@ -134,7 +134,7 @@ void main() {
 
     expect(state.items.contains('Item 3'), false);
 
-    final stateIndexes = List.from(state.selectedIndexesTrack);
+    final stateIndexes = List.from(state.selectedIndexesTrack!);
 
     await tester.tap(find.text('No keep'));
     await tester.pump();
@@ -171,22 +171,22 @@ class MyAppTest extends StatelessWidget {
 }
 
 class MyHomePageTest extends StatefulWidget {
-  MyHomePageTest({Key key, this.title}) : super(key: key);
+  MyHomePageTest({Key? key, this.title}) : super(key: key);
 
-  final String title;
+  final String? title;
 
   @override
   _MyHomePageTestState createState() => _MyHomePageTestState();
 }
 
 class _MyHomePageTestState extends State<MyHomePageTest> {
-  List<String> items;
-  List<String> selectedItemsTrack;
-  List<int> selectedIndexesTrack;
-  bool keepSelectedIndexes;
+  late List<String> items;
+  List<String>? selectedItemsTrack;
+  List<int>? selectedIndexesTrack;
+  bool? keepSelectedIndexes;
 
-  MultiselectController multiselectController;
-  Random random;
+  late MultiselectController multiselectController;
+  late Random random;
 
   @override
   void initState() {
@@ -202,7 +202,7 @@ class _MyHomePageTestState extends State<MyHomePageTest> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Text(widget.title!),
       ),
       body: MultiselectScope<String>(
         controller: multiselectController,
@@ -228,7 +228,7 @@ class _MyHomePageTestState extends State<MyHomePageTest> {
                     itemCount: items.length,
                     itemBuilder: (context, index) {
                       final controller = MultiselectScope.controllerOf(
-                          context); //MultiselectScope.of(context);
+                          context)!; //MultiselectScope.of(context);
 
                       final itemIsSelected = controller.isSelected(index);
 
@@ -356,7 +356,7 @@ class _MyHomePageTestState extends State<MyHomePageTest> {
                     fillColor: Colors.deepPurpleAccent,
                     onPressed: () {
                       setState(() {
-                        keepSelectedIndexes = !keepSelectedIndexes;
+                        keepSelectedIndexes = !keepSelectedIndexes!;
                       });
                     },
                   ),

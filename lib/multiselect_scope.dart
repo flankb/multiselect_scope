@@ -21,7 +21,7 @@ class MultiselectController extends ChangeNotifier {
   List<int> get selectedIndexes => _selectedIndexes;
   bool get selectionAttached => _selectedIndexes.any((element) => true);
 
-  int _itemsCount;
+  late int _itemsCount;
 
   /// Select (or unselect) item by index
   /// If passed [event] is [SelectionEvent.auto] function automatically
@@ -94,7 +94,7 @@ class MultiselectController extends ChangeNotifier {
     _itemsCount = dataSource.length;
   }
 
-  void _setSelectedIndexes(List<int> newIndexes, bool notifyListeners) {
+  void _setSelectedIndexes(List<int>? newIndexes, bool notifyListeners) {
     _selectedIndexes = newIndexes ?? [];
 
     if (notifyListeners) {
@@ -116,7 +116,7 @@ class MultiselectScope<T> extends StatefulWidget {
   /// Builds appropriate listeners on stage of init [MultiselectScope] widget
   /// and then does not change.
   /// This function will not invoke on first load of this widget.
-  final SelectionChangedCallback<T> onSelectionChanged;
+  final SelectionChangedCallback<T>? onSelectionChanged;
 
   /// An object that stores the selected indexes and also allows you to change them
   /// This object may be set once and can not be replaced
@@ -133,22 +133,22 @@ class MultiselectScope<T> extends StatefulWidget {
   /// If [true]: when you update [dataSource] then selected indexes will update
   /// so that the same elements in new [dataSource] are selected
   /// If [false]: selected indexes will have not automatically updates during [dataSource] update
-  final bool keepSelectedItemsBetweenUpdates;
+  final bool? keepSelectedItemsBetweenUpdates;
 
   /// Selected indexes, which will be initialized
   /// when the widget is inserted into the widget tree
-  final List<int> initialSelectedIndexes;
+  final List<int>? initialSelectedIndexes;
 
   MultiselectScope({
-    Key key,
-    @required this.dataSource,
+    Key? key,
+    required this.dataSource,
     // ignore: always_require_non_null_named_parameters
-    this.controller,
+    required this.controller,
     this.onSelectionChanged,
     this.clearSelectionOnPop = false,
     this.keepSelectedItemsBetweenUpdates = true,
     this.initialSelectedIndexes,
-    @required this.child,
+    required this.child,
   })  : assert(dataSource != null),
         assert(child != null),
         assert(controller != null),
@@ -157,20 +157,20 @@ class MultiselectScope<T> extends StatefulWidget {
   @override
   _MultiselectScopeState<T> createState() => _MultiselectScopeState<T>();
 
-  static MultiselectController controllerOf(BuildContext context) {
+  static MultiselectController? controllerOf(BuildContext context) {
     return context
-        .dependOnInheritedWidgetOfExactType<_InheritedMultiselectNotifier>()
+        .dependOnInheritedWidgetOfExactType<_InheritedMultiselectNotifier>()!
         .controller;
   }
 }
 
-class _MultiselectScopeState<T> extends State<MultiselectScope<T>> {
-  List<int> _hashesCopy;
-  MultiselectController _multiselectController;
+class _MultiselectScopeState<T> extends State<MultiselectScope<T?>> {
+  late List<int> _hashesCopy;
+  MultiselectController? _multiselectController;
 
   void _onSelectionChangedFunc() {
-    widget.onSelectionChanged(_multiselectController.selectedIndexes,
-        _multiselectController.getSelectedItems().cast<T>());
+    widget.onSelectionChanged!(_multiselectController!.selectedIndexes,
+        _multiselectController!.getSelectedItems().cast<T>());
   }
 
   List<int> _createHashesCopy(MultiselectScope widget) {
@@ -185,15 +185,15 @@ class _MultiselectScopeState<T> extends State<MultiselectScope<T>> {
     _multiselectController = widget.controller ?? MultiselectController();
 
     _hashesCopy = _createHashesCopy(widget);
-    _multiselectController._setDataSource(widget.dataSource);
+    _multiselectController!._setDataSource(widget.dataSource);
 
     if (widget.initialSelectedIndexes != null) {
-      _multiselectController._setSelectedIndexes(
+      _multiselectController!._setSelectedIndexes(
           widget.initialSelectedIndexes, false);
     }
 
     if (widget.onSelectionChanged != null) {
-      _multiselectController.addListener(_onSelectionChangedFunc);
+      _multiselectController!.addListener(_onSelectionChangedFunc);
     }
   }
 
@@ -201,19 +201,19 @@ class _MultiselectScopeState<T> extends State<MultiselectScope<T>> {
   void dispose() {
     super.dispose();
 
-    _multiselectController.removeListener(_onSelectionChangedFunc);
-    _multiselectController.dispose();
+    _multiselectController!.removeListener(_onSelectionChangedFunc);
+    _multiselectController!.dispose();
   }
 
   @override
   void didUpdateWidget(MultiselectScope oldWidget) {
-    super.didUpdateWidget(oldWidget);
+    super.didUpdateWidget(oldWidget as MultiselectScope<T*>);
     //debugPrint('didUpdateWidget GreatMultiselect');
-    if (widget.keepSelectedItemsBetweenUpdates) {
+    if (widget.keepSelectedItemsBetweenUpdates!) {
       _updateController(oldWidget);
     }
 
-    _multiselectController._setDataSource(widget.dataSource);
+    _multiselectController!._setDataSource(widget.dataSource);
   }
 
   @override
@@ -222,8 +222,8 @@ class _MultiselectScopeState<T> extends State<MultiselectScope<T>> {
     return widget.clearSelectionOnPop
         ? WillPopScope(
             onWillPop: () async {
-              if (_multiselectController.selectionAttached) {
-                _multiselectController.clearSelection();
+              if (_multiselectController!.selectionAttached) {
+                _multiselectController!.clearSelection();
                 return false;
               }
 
@@ -239,8 +239,8 @@ class _MultiselectScopeState<T> extends State<MultiselectScope<T>> {
           child: widget.child, controller: _multiselectController);
 
   void _updateController(MultiselectScope oldWidget) {
-    if (!oldWidget.keepSelectedItemsBetweenUpdates &&
-        widget.keepSelectedItemsBetweenUpdates) {
+    if (!oldWidget.keepSelectedItemsBetweenUpdates! &&
+        widget.keepSelectedItemsBetweenUpdates!) {
       // Recalculate hashes of previous state
       _hashesCopy = _createHashesCopy(oldWidget);
     }
@@ -249,7 +249,7 @@ class _MultiselectScopeState<T> extends State<MultiselectScope<T>> {
 
     //debugPrint(
     //    "Old dataSource: ${_hashesCopy} new dataSource: ${newHashesCopy}");
-    final oldSelectedHashes = _multiselectController.selectedIndexes
+    final oldSelectedHashes = _multiselectController!.selectedIndexes
         .map((e) => _hashesCopy[e])
         .toList();
 
@@ -261,16 +261,16 @@ class _MultiselectScopeState<T> extends State<MultiselectScope<T>> {
       }
     });
 
-    _multiselectController._setSelectedIndexes(newIndexes, false);
+    _multiselectController!._setSelectedIndexes(newIndexes, false);
     _hashesCopy = newHashesCopy;
   }
 }
 
 class _InheritedMultiselectNotifier
     extends InheritedNotifier<MultiselectController> {
-  final MultiselectController controller;
+  final MultiselectController? controller;
 
   const _InheritedMultiselectNotifier(
-      {Key key, @required Widget child, @required this.controller})
+      {Key? key, required Widget child, required this.controller})
       : super(key: key, child: child, notifier: controller);
 }
