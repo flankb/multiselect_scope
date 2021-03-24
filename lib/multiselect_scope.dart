@@ -121,7 +121,7 @@ class MultiselectScope<T> extends StatefulWidget {
   /// An object that stores the selected indexes and also allows you to change them
   /// This object may be set once and can not be replaced
   /// when updating the widget configuration
-  final MultiselectController controller;
+  final MultiselectController? controller;
 
   /// Data for selection tracking
   /// For example list of `Cars` or `Employes`
@@ -133,7 +133,7 @@ class MultiselectScope<T> extends StatefulWidget {
   /// If [true]: when you update [dataSource] then selected indexes will update
   /// so that the same elements in new [dataSource] are selected
   /// If [false]: selected indexes will have not automatically updates during [dataSource] update
-  final bool? keepSelectedItemsBetweenUpdates;
+  final bool keepSelectedItemsBetweenUpdates;
 
   /// Selected indexes, which will be initialized
   /// when the widget is inserted into the widget tree
@@ -142,17 +142,13 @@ class MultiselectScope<T> extends StatefulWidget {
   MultiselectScope({
     Key? key,
     required this.dataSource,
-    // ignore: always_require_non_null_named_parameters
-    required this.controller,
+    this.controller,
     this.onSelectionChanged,
     this.clearSelectionOnPop = false,
     this.keepSelectedItemsBetweenUpdates = true,
     this.initialSelectedIndexes,
     required this.child,
-  })   : assert(dataSource != null),
-        assert(child != null),
-        assert(controller != null),
-        super(key: key);
+  }) : super(key: key);
 
   @override
   _MultiselectScopeState<T> createState() => _MultiselectScopeState<T>();
@@ -181,19 +177,18 @@ class _MultiselectScopeState<T> extends State<MultiselectScope<T?>> {
   void initState() {
     super.initState();
 
-    //debugPrint('_GreatMultiselectState init()');
     _multiselectController = widget.controller ?? MultiselectController();
 
     _hashesCopy = _createHashesCopy(widget);
-    _multiselectController!._setDataSource(widget.dataSource);
+    _multiselectController?._setDataSource(widget.dataSource);
 
     if (widget.initialSelectedIndexes != null) {
-      _multiselectController!
-          ._setSelectedIndexes(widget.initialSelectedIndexes, false);
+      _multiselectController?._setSelectedIndexes(
+          widget.initialSelectedIndexes!, false);
     }
 
     if (widget.onSelectionChanged != null) {
-      _multiselectController!.addListener(_onSelectionChangedFunc);
+      _multiselectController?.addListener(_onSelectionChangedFunc);
     }
   }
 
@@ -209,11 +204,11 @@ class _MultiselectScopeState<T> extends State<MultiselectScope<T?>> {
   void didUpdateWidget(MultiselectScope oldWidget) {
     super.didUpdateWidget(oldWidget as MultiselectScope<T?>);
     //debugPrint('didUpdateWidget GreatMultiselect');
-    if (widget.keepSelectedItemsBetweenUpdates!) {
+    if (widget.keepSelectedItemsBetweenUpdates) {
       _updateController(oldWidget);
     }
 
-    _multiselectController!._setDataSource(widget.dataSource);
+    _multiselectController?._setDataSource(widget.dataSource);
   }
 
   @override
@@ -223,7 +218,7 @@ class _MultiselectScopeState<T> extends State<MultiselectScope<T?>> {
         ? WillPopScope(
             onWillPop: () async {
               if (_multiselectController!.selectionAttached) {
-                _multiselectController!.clearSelection();
+                _multiselectController?.clearSelection();
                 return false;
               }
 
@@ -239,8 +234,8 @@ class _MultiselectScopeState<T> extends State<MultiselectScope<T?>> {
           child: widget.child, controller: _multiselectController);
 
   void _updateController(MultiselectScope oldWidget) {
-    if (!oldWidget.keepSelectedItemsBetweenUpdates! &&
-        widget.keepSelectedItemsBetweenUpdates!) {
+    if (!oldWidget.keepSelectedItemsBetweenUpdates &&
+        widget.keepSelectedItemsBetweenUpdates) {
       // Recalculate hashes of previous state
       _hashesCopy = _createHashesCopy(oldWidget);
     }
@@ -261,7 +256,7 @@ class _MultiselectScopeState<T> extends State<MultiselectScope<T?>> {
       }
     });
 
-    _multiselectController!._setSelectedIndexes(newIndexes, false);
+    _multiselectController?._setSelectedIndexes(newIndexes, false);
     _hashesCopy = newHashesCopy;
   }
 }
