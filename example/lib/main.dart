@@ -70,7 +70,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: ListView.builder(
                     itemCount: _items.length,
                     itemBuilder: (context, index) {
-                      final controller = MultiselectScope.controllerOf(context)!;
+                      final controller =
+                          MultiselectScope.controllerOf(context)!;
 
                       final itemIsSelected = controller.isSelected(index);
 
