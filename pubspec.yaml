@@ -1,6 +1,6 @@
 name: multiselect_scope
 description: Package for multiple selection and tracking selected items (select all, clear, invert selection, etc.)
-version: 0.1.1
+version: 0.2.0
 homepage: https://github.com/flankb/multiselect_scope
 
 environment:

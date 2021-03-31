@@ -183,7 +183,7 @@ class _MyHomePageTestState extends State<MyHomePageTest> {
   late List<String> items;
   List<String>? selectedItemsTrack;
   List<int>? selectedIndexesTrack;
-  bool? keepSelectedIndexes;
+  late bool keepSelectedIndexes;
 
   late MultiselectController multiselectController;
   late Random random;
@@ -356,7 +356,7 @@ class _MyHomePageTestState extends State<MyHomePageTest> {
                     fillColor: Colors.deepPurpleAccent,
                     onPressed: () {
                       setState(() {
-                        keepSelectedIndexes = !keepSelectedIndexes!;
+                        keepSelectedIndexes = !keepSelectedIndexes;
                       });
                     },
                   ),

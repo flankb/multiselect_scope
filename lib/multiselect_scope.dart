@@ -1,6 +1,7 @@
 library multiselect_scope;
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 enum SelectionEvent {
   /// Unselect item if it selected, select otherwise
@@ -160,7 +161,7 @@ class MultiselectScope<T> extends StatefulWidget {
   }
 }
 
-class _MultiselectScopeState<T> extends State<MultiselectScope<T?>> {
+class _MultiselectScopeState<T> extends State<MultiselectScope<T>> {
   late List<int> _hashesCopy;
   MultiselectController? _multiselectController;
 
@@ -187,6 +188,7 @@ class _MultiselectScopeState<T> extends State<MultiselectScope<T?>> {
           widget.initialSelectedIndexes!, false);
     }
 
+    //_multiselectController?.addListener(_onSelectionChangedFunc);
     if (widget.onSelectionChanged != null) {
       _multiselectController?.addListener(_onSelectionChangedFunc);
     }
@@ -202,8 +204,9 @@ class _MultiselectScopeState<T> extends State<MultiselectScope<T?>> {
 
   @override
   void didUpdateWidget(MultiselectScope oldWidget) {
-    super.didUpdateWidget(oldWidget as MultiselectScope<T?>);
-    //debugPrint('didUpdateWidget GreatMultiselect');
+    super.didUpdateWidget(oldWidget as MultiselectScope<T>);
+    debugPrint('didUpdateWidget GreatMultiselect');
+
     if (widget.keepSelectedItemsBetweenUpdates) {
       _updateController(oldWidget);
     }
