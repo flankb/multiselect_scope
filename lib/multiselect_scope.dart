@@ -163,11 +163,13 @@ class MultiselectScope<T> extends StatefulWidget {
 
 class _MultiselectScopeState<T> extends State<MultiselectScope<T>> {
   late List<int> _hashesCopy;
-  MultiselectController? _multiselectController;
+  late MultiselectController _multiselectController;
 
   void _onSelectionChangedFunc() {
-    widget.onSelectionChanged!(_multiselectController!.selectedIndexes,
-        _multiselectController!.getSelectedItems().cast<T>());
+    if (widget.onSelectionChanged != null) {
+      widget.onSelectionChanged!(_multiselectController.selectedIndexes,
+          _multiselectController.getSelectedItems().cast<T>());
+    }
   }
 
   List<int> _createHashesCopy(MultiselectScope widget) {
@@ -181,16 +183,15 @@ class _MultiselectScopeState<T> extends State<MultiselectScope<T>> {
     _multiselectController = widget.controller ?? MultiselectController();
 
     _hashesCopy = _createHashesCopy(widget);
-    _multiselectController?._setDataSource(widget.dataSource);
+    _multiselectController._setDataSource(widget.dataSource);
 
     if (widget.initialSelectedIndexes != null) {
-      _multiselectController?._setSelectedIndexes(
+      _multiselectController._setSelectedIndexes(
           widget.initialSelectedIndexes!, false);
     }
 
-    //_multiselectController?.addListener(_onSelectionChangedFunc);
     if (widget.onSelectionChanged != null) {
-      _multiselectController?.addListener(_onSelectionChangedFunc);
+      _multiselectController.addListener(_onSelectionChangedFunc);
     }
   }
 
@@ -198,20 +199,20 @@ class _MultiselectScopeState<T> extends State<MultiselectScope<T>> {
   void dispose() {
     super.dispose();
 
-    _multiselectController!.removeListener(_onSelectionChangedFunc);
-    _multiselectController!.dispose();
+    _multiselectController.removeListener(_onSelectionChangedFunc);
+    _multiselectController.dispose();
   }
 
   @override
-  void didUpdateWidget(MultiselectScope oldWidget) {
-    super.didUpdateWidget(oldWidget as MultiselectScope<T>);
+  void didUpdateWidget(MultiselectScope<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
     debugPrint('didUpdateWidget GreatMultiselect');
 
     if (widget.keepSelectedItemsBetweenUpdates) {
       _updateController(oldWidget);
     }
 
-    _multiselectController?._setDataSource(widget.dataSource);
+    _multiselectController._setDataSource(widget.dataSource);
   }
 
   @override
@@ -220,8 +221,8 @@ class _MultiselectScopeState<T> extends State<MultiselectScope<T>> {
     return widget.clearSelectionOnPop
         ? WillPopScope(
             onWillPop: () async {
-              if (_multiselectController!.selectionAttached) {
-                _multiselectController?.clearSelection();
+              if (_multiselectController.selectionAttached) {
+                _multiselectController.clearSelection();
                 return false;
               }
 
@@ -247,7 +248,7 @@ class _MultiselectScopeState<T> extends State<MultiselectScope<T>> {
 
     //debugPrint(
     //    "Old dataSource: ${_hashesCopy} new dataSource: ${newHashesCopy}");
-    final oldSelectedHashes = _multiselectController!.selectedIndexes
+    final oldSelectedHashes = _multiselectController.selectedIndexes
         .map((e) => _hashesCopy[e])
         .toList();
 
@@ -259,7 +260,7 @@ class _MultiselectScopeState<T> extends State<MultiselectScope<T>> {
       }
     });
 
-    _multiselectController?._setSelectedIndexes(newIndexes, false);
+    _multiselectController._setSelectedIndexes(newIndexes, false);
     _hashesCopy = newHashesCopy;
   }
 }

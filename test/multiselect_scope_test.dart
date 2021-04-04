@@ -87,7 +87,8 @@ void main() {
         true);
 
     // 6. Выделить 4 и 7 элементы нажать на кнопку Add rand, Убедиться, что остались выделены те же эелементы
-    await tester.tap(find.text('Item 4'));
+    await tester.longPress(find.text('Item 4'));
+    await tester.pump();
     await tester.tap(find.text('Item 7'));
     await tester.pump();
 
@@ -107,7 +108,7 @@ void main() {
 
     preselected.forEach((String preselectedItem) {
       if (state.items.contains(preselectedItem)) {
-        expect(_stateItems.containsAll(preselected), true);
+        expect(_stateItems?.contains(preselectedItem), true);
       }
       ;
     });
@@ -271,11 +272,9 @@ class _MyHomePageTestState extends State<MyHomePageTest> {
                         final randItem =
                             'RandItem' + random.nextInt(256).toString();
 
-                        final randomIndex = items.isEmpty
-                            ? 0
-                            : random.nextInt(items.length - 1);
-                        items.insert(randomIndex,
-                            randItem); // TODO Fix after delete all!
+                        final randomIndex =
+                            items.isEmpty ? 0 : random.nextInt(items.length);
+                        items.insert(randomIndex, randItem);
                       });
                     },
                   ),

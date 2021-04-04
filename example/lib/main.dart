@@ -54,7 +54,7 @@ class _MyHomePageState extends State<MyHomePage> {
         controller: _multiselectController,
         dataSource: _items,
         clearSelectionOnPop: true,
-        keepSelectedItemsBetweenUpdates: false,
+        keepSelectedItemsBetweenUpdates: true,
         initialSelectedIndexes: [1, 3],
         onSelectionChanged: (indexes, items) {
           debugPrint(
@@ -114,11 +114,9 @@ class _MyHomePageState extends State<MyHomePage> {
                         final randItem =
                             'RandItem' + random.nextInt(256).toString();
 
-                        final randomIndex = _items.isEmpty
-                            ? 0
-                            : random.nextInt(_items.length - 1);
-                        _items.insert(randomIndex,
-                            randItem); // TODO Fix after delete all!
+                        final randomIndex =
+                            _items.isEmpty ? 0 : random.nextInt(_items.length);
+                        _items.insert(randomIndex, randItem);
                       });
                     },
                   ),
@@ -158,9 +156,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     child: Text('Select 0'),
                     fillColor: Colors.lightGreen,
                     onPressed: () {
-                      setState(() {
-                        _multiselectController.select(0);
-                      });
+                      _multiselectController.select(0);
                     },
                   ),
                   RawMaterialButton(
@@ -168,9 +164,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     child: Text('Select all'),
                     fillColor: Colors.amber,
                     onPressed: () {
-                      setState(() {
-                        _multiselectController.selectAll();
-                      });
+                      _multiselectController.selectAll();
                     },
                   ),
                   RawMaterialButton(
@@ -178,9 +172,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     child: Text('Invert'),
                     fillColor: Colors.tealAccent,
                     onPressed: () {
-                      setState(() {
-                        _multiselectController.invertSelection();
-                      });
+                      _multiselectController.invertSelection();
                     },
                   ),
                   RawMaterialButton(
@@ -188,9 +180,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     child: Text('Clear'),
                     fillColor: Colors.deepPurpleAccent,
                     onPressed: () {
-                      setState(() {
-                        _multiselectController.clearSelection();
-                      });
+                      _multiselectController.clearSelection();
                     },
                   ),
                 ],
