@@ -154,7 +154,7 @@ class MultiselectScope<T> extends StatefulWidget {
   @override
   _MultiselectScopeState<T> createState() => _MultiselectScopeState<T>();
 
-  static MultiselectController? controllerOf(BuildContext context) {
+  static MultiselectController controllerOf(BuildContext context) {
     return context
         .dependOnInheritedWidgetOfExactType<_InheritedMultiselectNotifier>()!
         .controller;
@@ -267,7 +267,7 @@ class _MultiselectScopeState<T> extends State<MultiselectScope<T>> {
 
 class _InheritedMultiselectNotifier
     extends InheritedNotifier<MultiselectController> {
-  final MultiselectController? controller;
+  final MultiselectController controller;
 
   const _InheritedMultiselectNotifier(
       {Key? key, required Widget child, required this.controller})

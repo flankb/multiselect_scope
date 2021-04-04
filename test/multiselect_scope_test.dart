@@ -229,7 +229,7 @@ class _MyHomePageTestState extends State<MyHomePageTest> {
                     itemCount: items.length,
                     itemBuilder: (context, index) {
                       final controller = MultiselectScope.controllerOf(
-                          context)!; //MultiselectScope.of(context);
+                          context); //MultiselectScope.of(context);
 
                       final itemIsSelected = controller.isSelected(index);
 
